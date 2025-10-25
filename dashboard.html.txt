@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard — Service-Ya</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-left"><a href="index.html" class="brand">Service-Ya</a></div>
+    <div class="nav-right">
+      <a href="clientes.html">Clientes</a>
+      <a href="pedidos.html">Pedidos</a>
+      <a href="dashboard.html" class="active">Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h2>Dashboard</h2>
+
+    <section class="cards" id="cardsTotales">
+      <div class="card"><h3>Clientes</h3><p id="totClientes">-</p></div>
+      <div class="card"><h3>Pedidos</h3><p id="totPedidos">-</p></div>
+      <div class="card"><h3>Ingresos pendientes</h3><p id="ingPend">-</p></div>
+      <div class="card"><h3>Ingresos finalizados</h3><p id="ingFin">-</p></div>
+    </section>
+
+    <section class="panel">
+      <h3>Pedidos por estado</h3>
+      <table class="table" id="tablaEstados">
+        <thead><tr><th>Estado</th><th>Cantidad</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="footer">Service-Ya Computación — © 2025</footer>
+  <script src="js/app.js"></script>
+</body>
+</html>

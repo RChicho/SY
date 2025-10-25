@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Service-Ya Computación</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-left">
+      <a href="index.html" class="brand">Service-Ya</a>
+    </div>
+    <div class="nav-right">
+      <a href="clientes.html">Clientes</a>
+      <a href="pedidos.html">Pedidos</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <img src="img/logo.png" alt="Logo Service-Ya" class="logo">
+      <h1>SERVICE-YA COMPUTACIÓN</h1>
+      <p>Gestioná clientes, pedidos y finanzas de forma simple y eficiente.</p>
+    </section>
+
+    <section class="grid">
+      <a class="card" href="clientes.html">
+        <h3>Clientes</h3>
+        <p>Altas, edición, listado y búsqueda.</p>
+      </a>
+      <a class="card" href="pedidos.html">
+        <h3>Pedidos</h3>
+        <p>Registro, seguimiento y estados.</p>
+      </a>
+      <a class="card" href="dashboard.html">
+        <h3>Dashboard</h3>
+        <p>Métricas y estado general del negocio.</p>
+      </a>
+    </section>
+  </main>
+
+  <footer class="footer">Service-Ya Computación — © 2025</footer>
+</body>
+</html>

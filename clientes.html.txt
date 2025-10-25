@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Clientes — Service-Ya</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-left"><a href="index.html" class="brand">Service-Ya</a></div>
+    <div class="nav-right">
+      <a href="clientes.html" class="active">Clientes</a>
+      <a href="pedidos.html">Pedidos</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h2>Gestión de Clientes</h2>
+
+    <form id="formCliente" class="form">
+      <input type="hidden" name="id" id="clienteId">
+      <div class="row">
+        <input type="text" name="nombre" id="clienteNombre" placeholder="Nombre" required>
+        <input type="email" name="email" id="clienteEmail" placeholder="Email" required>
+        <input type="text" name="telefono" id="clienteTelefono" placeholder="Teléfono" required>
+      </div>
+      <div class="actions">
+        <button type="submit">Guardar</button>
+        <button type="button" id="btnReset">Limpiar</button>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <input type="search" id="buscarCliente" placeholder="Buscar por nombre o email">
+      <button id="btnBuscar">Buscar</button>
+      <button id="btnRefrescar">Refrescar</button>
+    </div>
+
+    <table class="table" id="tablaClientes">
+      <thead>
+        <tr>
+          <th>ID</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <footer class="footer">Service-Ya Computación — © 2025</footer>
+  <script src="js/app.js"></script>
+</body>
+</html>

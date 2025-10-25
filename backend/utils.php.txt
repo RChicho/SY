@@ -1,0 +1,20 @@
+<?php
+function json_response($data, $status = 200) {
+  http_response_code($status);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode($data, JSON_UNESCAPED_UNICODE);
+  exit;
+}
+
+function read_json() {
+  $input = file_get_contents('php://input');
+  return $input ? json_decode($input, true) : [];
+}
+
+function require_fields($data, $fields) {
+  foreach ($fields as $f) {
+    if (!isset($data[$f]) || $data[$f] === '') {
+      json_response(['error' => "Falta el campo: $f"], 400);
+    }
+  }
+}

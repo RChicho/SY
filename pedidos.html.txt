@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pedidos — Service-Ya</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-left"><a href="index.html" class="brand">Service-Ya</a></div>
+    <div class="nav-right">
+      <a href="clientes.html">Clientes</a>
+      <a href="pedidos.html" class="active">Pedidos</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h2>Gestión de Pedidos</h2>
+
+    <form id="formPedido" class="form">
+      <input type="hidden" id="pedidoId">
+      <div class="row">
+        <select id="pedidoCliente" required></select>
+        <input type="text" id="pedidoDescripcion" placeholder="Descripción" required>
+        <select id="pedidoEstado" required>
+          <option>Pendiente</option>
+          <option>En proceso</option>
+          <option>Terminado</option>
+          <option>Entregado</option>
+          <option>Cancelado</option>
+        </select>
+        <input type="number" step="0.01" id="pedidoImporte" placeholder="Importe" required>
+        <input type="date" id="pedidoIngreso" required>
+        <input type="date" id="pedidoEntrega">
+      </div>
+      <div class="actions">
+        <button type="submit">Guardar</button>
+        <button type="button" id="pedidoReset">Limpiar</button>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <label>Filtrar por estado:</label>
+      <select id="filtroEstado">
+        <option value="">Todos</option>
+        <option>Pendiente</option>
+        <option>En proceso</option>
+        <option>Terminado</option>
+        <option>Entregado</option>
+        <option>Cancelado</option>
+      </select>
+      <button id="btnFiltrar">Aplicar</button>
+      <button id="btnRefrescarPedidos">Refrescar</button>
+    </div>
+
+    <table class="table" id="tablaPedidos">
+      <thead>
+        <tr>
+          <th>ID</th><th>Cliente</th><th>Descripción</th><th>Estado</th><th>Importe</th><th>Ingreso</th><th>Entrega</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <footer class="footer">Service-Ya Computación — © 2025</footer>
+  <script src="js/app.js"></script>
+</body>
+</html>

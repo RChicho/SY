@@ -1,0 +1,37 @@
+-- Crear base y tablas
+CREATE DATABASE IF NOT EXISTS serviceya CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE serviceya;
+
+-- Tabla clientes
+CREATE TABLE IF NOT EXISTS clientes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  email VARCHAR(120) NOT NULL,
+  telefono VARCHAR(30) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices útiles
+CREATE INDEX idx_clientes_email ON clientes(email);
+
+-- Tabla pedidos
+CREATE TABLE IF NOT EXISTS pedidos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id INT NOT NULL,
+  descripcion TEXT NOT NULL,
+  estado ENUM('Pendiente','En proceso','Terminado','Entregado','Cancelado') NOT NULL DEFAULT 'Pendiente',
+  importe DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  fecha_ingreso DATE NOT NULL,
+  fecha_entrega DATE NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+);
+
+-- Datos de ejemplo (opcionales)
+INSERT INTO clientes (nombre, email, telefono) VALUES
+('Juan Pérez', 'juan@example.com', '11-5555-0000'),
+('Ana García', 'ana@example.com', '11-5555-1111');
+
+INSERT INTO pedidos (cliente_id, descripcion, estado, importe, fecha_ingreso, fecha_entrega) VALUES
+(1, 'Reparación notebook Lenovo', 'En proceso', 45000.00, CURDATE(), NULL),
+(2, 'Instalación Windows y optimización', 'Pendiente', 30000.00, CURDATE(), NULL);

@@ -1,0 +1,58 @@
+<?php
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/utils.php';
+
+$method = $_SERVER['REQUEST_METHOD'];
+$db = get_db();
+
+try {
+  if ($method === 'GET') {
+    // /backend/clientes.php?id=#
+    if (isset($_GET['id'])) {
+      $stmt = $db->prepare("SELECT id, nombre, email, telefono, created_at FROM clientes WHERE id = ?");
+      $stmt->bind_param('i', $_GET['id']);
+      $stmt->execute();
+      $res = $stmt->get_result()->fetch_assoc();
+      json_response($res ?: []);
+    } else {
+      $q = isset($_GET['q']) ? '%' . $_GET['q'] . '%' : '%';
+      $stmt = $db->prepare("SELECT id, nombre, email, telefono, created_at FROM clientes WHERE nombre LIKE ? OR email LIKE ? ORDER BY created_at DESC");
+      $stmt->bind_param('ss', $q, $q);
+      $stmt->execute();
+      $res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      json_response($res);
+    }
+  }
+
+  if ($method === 'POST') {
+    $data = $_POST ?: read_json();
+    require_fields($data, ['nombre', 'email', 'telefono']);
+    $stmt = $db->prepare("INSERT INTO clientes (nombre, email, telefono) VALUES (?, ?, ?)");
+    $stmt->bind_param('sss', $data['nombre'], $data['email'], $data['telefono']);
+    $stmt->execute();
+    json_response(['message' => 'Cliente creado', 'id' => $stmt->insert_id], 201);
+  }
+
+  if ($method === 'PUT') {
+    $data = read_json();
+    require_fields($data, ['id', 'nombre', 'email', 'telefono']);
+    $stmt = $db->prepare("UPDATE clientes SET nombre = ?, email = ?, telefono = ? WHERE id = ?");
+    $stmt->bind_param('sssi', $data['nombre'], $data['email'], $data['telefono'], $data['id']);
+    $stmt->execute();
+    json_response(['message' => 'Cliente actualizado']);
+  }
+
+  if ($method === 'DELETE') {
+    $id = $_GET['id'] ?? (read_json()['id'] ?? null);
+    if (!$id) json_response(['error' => 'Falta id'], 400);
+    $stmt = $db->prepare("DELETE FROM clientes WHERE id = ?");
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    json_response(['message' => 'Cliente eliminado']);
+  }
+
+  json_response(['error' => 'Método no soportado'], 405);
+} catch (Throwable $e) {
+  $msg = (APP_ENV === 'development') ? $e->getMessage() : 'Error interno';
+  json_response(['error' => $msg], 500);
+}

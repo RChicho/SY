@@ -1,0 +1,35 @@
+<?php
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/utils.php';
+
+$db = get_db();
+
+try {
+  // Métricas generales
+  $totalClientes = $db->query("SELECT COUNT(*) AS c FROM clientes")->fetch_assoc()['c'];
+  $totalPedidos = $db->query("SELECT COUNT(*) AS c FROM pedidos")->fetch_assoc()['c'];
+  $ingresosPendientes = $db->query("SELECT COALESCE(SUM(importe),0) AS s FROM pedidos WHERE estado IN ('Pendiente','En proceso')")->fetch_assoc()['s'];
+  $ingresosFinalizados = $db->query("SELECT COALESCE(SUM(importe),0) AS s FROM pedidos WHERE estado IN ('Terminado','Entregado')")->fetch_assoc()['s'];
+
+  // Pedidos por estado
+  $estados = ['Pendiente','En proceso','Terminado','Entregado','Cancelado'];
+  $porEstado = [];
+  $stmt = $db->prepare("SELECT estado, COUNT(*) AS c FROM pedidos GROUP BY estado");
+  $stmt->execute();
+  $res = $stmt->get_result();
+  while ($row = $res->fetch_assoc()) { $porEstado[$row['estado']] = (int)$row['c']; }
+  foreach ($estados as $e) { if (!isset($porEstado[$e])) $porEstado[$e] = 0; }
+
+  json_response([
+    'totales' => [
+      'clientes' => (int)$totalClientes,
+      'pedidos' => (int)$totalPedidos,
+      'ingresosPendientes' => (float)$ingresosPendientes,
+      'ingresosFinalizados' => (float)$ingresosFinalizados
+    ],
+    'porEstado' => $porEstado
+  ]);
+} catch (Throwable $e) {
+  $msg = (APP_ENV === 'development') ? $e->getMessage() : 'Error interno';
+  json_response(['error' => $msg], 500);
+}

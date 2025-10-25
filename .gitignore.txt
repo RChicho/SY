@@ -1,0 +1,15 @@
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignorar configuraciones locales
+*.log
+*.tmp
+*.bak
+
+# Ignorar credenciales
+backend/config.php
+
+# Ignorar carpetas de Windows
+AppData/

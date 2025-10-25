@@ -1,0 +1,201 @@
+const API = {
+  clientes: 'backend/clientes.php',
+  pedidos: 'backend/pedidos.php',
+  dashboard: 'backend/dashboard.php'
+};
+
+// Utilidades
+const fetchJSON = async (url, options = {}) => {
+  const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Error en la solicitud');
+  return data;
+};
+const formatMoney = v => Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(Number(v || 0));
+const q = sel => document.querySelector(sel);
+const qa = sel => Array.from(document.querySelectorAll(sel));
+
+// Clientes
+async function cargarClientes(query = '') {
+  const data = await fetchJSON(`${API.clientes}${query ? `?q=${encodeURIComponent(query)}` : ''}`);
+  const tbody = q('#tablaClientes tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  data.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.id}</td>
+      <td>${c.nombre}</td>
+      <td>${c.email}</td>
+      <td>${c.telefono}</td>
+      <td>
+        <button class="btn btn-success" data-act="edit" data-id="${c.id}">Editar</button>
+        <button class="btn btn-danger" data-act="del" data-id="${c.id}">Eliminar</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.onclick = async e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (btn.dataset.act === 'edit') {
+      const c = await fetchJSON(`${API.clientes}?id=${id}`);
+      q('#clienteId').value = c.id || '';
+      q('#clienteNombre').value = c.nombre || '';
+      q('#clienteEmail').value = c.email || '';
+      q('#clienteTelefono').value = c.telefono || '';
+      q('#clienteNombre').focus();
+    }
+    if (btn.dataset.act === 'del') {
+      if (confirm('¿Eliminar cliente? Esto borrará sus pedidos asociados.')) {
+        await fetchJSON(`${API.clientes}?id=${id}`, { method: 'DELETE' });
+        cargarClientes(q('#buscarCliente')?.value || '');
+      }
+    }
+  };
+}
+
+function initClientes() {
+  if (!q('#formCliente')) return;
+  cargarClientes();
+  q('#btnRefrescar').onclick = () => cargarClientes(q('#buscarCliente').value);
+  q('#btnBuscar').onclick = () => cargarClientes(q('#buscarCliente').value);
+  q('#btnReset').onclick = () => { q('#formCliente').reset(); q('#clienteId').value = ''; };
+
+  q('#formCliente').onsubmit = async e => {
+    e.preventDefault();
+    const id = q('#clienteId').value;
+    const payload = {
+      nombre: q('#clienteNombre').value.trim(),
+      email: q('#clienteEmail').value.trim(),
+      telefono: q('#clienteTelefono').value.trim()
+    };
+    try {
+      if (id) {
+        await fetchJSON(API.clientes, { method: 'PUT', body: JSON.stringify({ id: Number(id), ...payload }) });
+      } else {
+        await fetchJSON(API.clientes, { method: 'POST', body: JSON.stringify(payload) });
+      }
+      q('#formCliente').reset(); q('#clienteId').value = '';
+      cargarClientes(q('#buscarCliente').value);
+    } catch (err) { alert(err.message); }
+  };
+}
+
+// Pedidos
+async function cargarClientesSelect() {
+  const clientes = await fetchJSON(API.clientes);
+  const sel = q('#pedidoCliente');
+  if (!sel) return;
+  sel.innerHTML = '<option value="" disabled selected>Seleccioná cliente</option>';
+  clientes.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = `${c.id} — ${c.nombre}`;
+    sel.appendChild(opt);
+  });
+}
+
+async function cargarPedidos(estado = '') {
+  const url = `${API.pedidos}${estado ? `?estado=${encodeURIComponent(estado)}` : ''}`;
+  const data = await fetchJSON(url);
+  const tbody = q('#tablaPedidos tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  data.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.id}</td>
+      <td>${p.cliente}</td>
+      <td>${p.descripcion}</td>
+      <td>${p.estado}</td>
+      <td>${formatMoney(p.importe)}</td>
+      <td>${p.fecha_ingreso}</td>
+      <td>${p.fecha_entrega || '-'}</td>
+      <td>
+        <button class="btn btn-success" data-act="edit" data-id="${p.id}">Editar</button>
+        <button class="btn btn-danger" data-act="del" data-id="${p.id}">Eliminar</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.onclick = async e => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    const id = btn.dataset.id;
+    if (btn.dataset.act === 'edit') {
+      const p = await fetchJSON(`${API.pedidos}?id=${id}`);
+      q('#pedidoId').value = p.id || '';
+      q('#pedidoCliente').value = p.cliente_id || '';
+      q('#pedidoDescripcion').value = p.descripcion || '';
+      q('#pedidoEstado').value = p.estado || 'Pendiente';
+      q('#pedidoImporte').value = p.importe || 0;
+      q('#pedidoIngreso').value = p.fecha_ingreso || '';
+      q('#pedidoEntrega').value = p.fecha_entrega || '';
+      q('#pedidoDescripcion').focus();
+    }
+    if (btn.dataset.act === 'del') {
+      if (confirm('¿Eliminar pedido?')) {
+        await fetchJSON(`${API.pedidos}?id=${id}`, { method: 'DELETE' });
+        cargarPedidos(q('#filtroEstado').value);
+      }
+    }
+  };
+}
+
+function initPedidos() {
+  if (!q('#formPedido')) return;
+  cargarClientesSelect();
+  cargarPedidos();
+  q('#btnRefrescarPedidos').onclick = () => cargarPedidos(q('#filtroEstado').value);
+  q('#btnFiltrar').onclick = () => cargarPedidos(q('#filtroEstado').value);
+  q('#pedidoReset').onclick = () => { q('#formPedido').reset(); q('#pedidoId').value = ''; };
+
+  q('#formPedido').onsubmit = async e => {
+    e.preventDefault();
+    const id = q('#pedidoId').value;
+    const payload = {
+      cliente_id: Number(q('#pedidoCliente').value),
+      descripcion: q('#pedidoDescripcion').value.trim(),
+      estado: q('#pedidoEstado').value,
+      importe: Number(q('#pedidoImporte').value),
+      fecha_ingreso: q('#pedidoIngreso').value,
+      fecha_entrega: q('#pedidoEntrega').value || null
+    };
+    try {
+      if (id) {
+        await fetchJSON(API.pedidos, { method: 'PUT', body: JSON.stringify({ id: Number(id), ...payload }) });
+      } else {
+        await fetchJSON(API.pedidos, { method: 'POST', body: JSON.stringify(payload) });
+      }
+      q('#formPedido').reset(); q('#pedidoId').value = '';
+      cargarPedidos(q('#filtroEstado').value);
+    } catch (err) { alert(err.message); }
+  };
+}
+
+// Dashboard
+async function cargarDashboard() {
+  if (!q('#totClientes')) return;
+  const data = await fetchJSON(API.dashboard);
+  q('#totClientes').textContent = data.totales.clientes;
+  q('#totPedidos').textContent = data.totales.pedidos;
+  q('#ingPend').textContent = formatMoney(data.totales.ingresosPendientes);
+  q('#ingFin').textContent = formatMoney(data.totales.ingresosFinalizados);
+
+  const tbody = q('#tablaEstados tbody');
+  tbody.innerHTML = '';
+  Object.entries(data.porEstado).forEach(([estado, cant]) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${estado}</td><td>${cant}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// Init global
+document.addEventListener('DOMContentLoaded', () => {
+  initClientes();
+  initPedidos();
+  cargarDashboard();
+});
